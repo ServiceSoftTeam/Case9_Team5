@@ -21,6 +21,16 @@ allowed_classes = ['Toilet',
                    'Shelf',
                    'Chair',
                    ]
+
+RU_NAMES = {
+    'Toilet': 'Туалет',
+    'Oven': 'Печь',
+    'Sink': 'Кран',
+    'Tap': 'Раковина',
+    'Shelf': 'Шкаф',
+    'Chair': 'Стул'
+}
+
 seed = 2023
 
 
@@ -91,7 +101,7 @@ def cv_detection(video: str):
     fps = cap.get(cv.CAP_PROP_FPS)
     N_SKIPPED_FRAMES: int = fps if fps < 10 else fps // 6
     frame_count = 0
-
+    READY_PRECENTAGE: int = 90
     lst_of_rooms_with_windows = []
     lst_of_objects = []
     lst_of_doors = []
@@ -149,11 +159,32 @@ def cv_detection(video: str):
             "Name", "Frame_count", "Score"
         ])
 
+        # dr
+        # cr
+        # toilet
+        # oven
+
         result = {
             "Door_ready": len(df_doors['Class'].unique()) >= len(df_wind['Class'].unique()),
             "Ceiling_ready": df_wind['Ceiling'].mean() >= 0.7,
             "Detected_objects": df_objects[df_objects.groupby('Name')['Score'].transform(max) == df_objects['Score']].to_dict('records')
         }
+
+        if not result['Door_ready']:
+            READY_PRECENTAGE -= 30
+        if not result['Ceiling_ready']:
+            READY_PRECENTAGE -= 30
+
+        t_flag = False
+        for i in result['Detected_objects']:
+            if i['Name'] == 'Toilet':
+                t_flag = True
+            i['Name'] = RU_NAMES[i['Name']]
+        if not t_flag:
+            READY_PRECENTAGE -= 30
+        result['Ready_precentage'] = 0 if READY_PRECENTAGE == 10 else READY_PRECENTAGE
+        for i in result:
+            print(i)
         return result
     except Exception as e:
         print(e)
@@ -164,5 +195,4 @@ def cv_detection(video: str):
 
 
 if __name__ == '__main__':
-    output = cv_detection("/home/servervf/case-19/cv_analytic/data/4.mp4")
-    print(output)
+    output = cv_detection("../static/7.mp4")
