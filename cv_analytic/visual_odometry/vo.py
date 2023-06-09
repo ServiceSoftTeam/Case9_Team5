@@ -9,7 +9,7 @@ import tensorflow_hub as hub
 import numpy as np
 from sklearn.cluster import AgglomerativeClustering
 import pandas as pd
-from pose_evaluation_utils import rot2quat
+from visual_odometry.pose_evaluation_utils import rot2quat
 
 tf.config.set_visible_devices([], 'GPU')
 model = hub.load(
@@ -354,7 +354,7 @@ def vo_video(object):
         traj_name = 'trajMap.png'
         cv2.imwrite(traj_name, trajMap)
         ret, jpeg = cv2.imencode('.jpg', trajMap)
-        result['Trajectory_path'] = os.getcwd() + f'/{traj_name}'
+        result['Trajectory_path'] = jpeg.tobytes()
         return result
 
 if __name__ == '__main__':
