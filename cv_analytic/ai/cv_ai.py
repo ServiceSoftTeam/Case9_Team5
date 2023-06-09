@@ -10,7 +10,7 @@ import typing
 
 tf.config.set_visible_devices([], 'GPU')
 model = hub.load(
-    "/home/servervf/case-19/cv_analytic/openimages_v4_ssd_mobilenet_v2_1").signatures['default']
+    "/mnt/e/Case9_Team5/cv_analytic/openimages_v4_ssd_mobilenet_v2_1").signatures['default']
 
 ALLOWED_CLASSES = ['Toilet',
                    'Oven',
@@ -24,8 +24,8 @@ ALLOWED_CLASSES = ['Toilet',
 RU_NAMES = {
     'Toilet': 'Туалет',
     'Oven': 'Печь',
-    'Sink': 'Кран',
-    'Tap': 'Раковина',
+    'Sink': 'Раковина',
+    'Tap': 'Кран',
     'Shelf': 'Шкаф',
     'Chair': 'Стул'
 }
@@ -63,6 +63,15 @@ def class_detection(frame: cv.Mat, list_of_rooms_with_windows: list, lst_of_door
                 lst_of_doors.append(
                     [frame_count, int(100 * scores[i])])
             if classes[i].numpy().decode() in ALLOWED_CLASSES:
+                (left, right, top, bottom) = (int(boxes[i][1] * frame.shape[1]), int(boxes[i][3] * frame.shape[1]),
+                                                  int(boxes[i][0] * frame.shape[0]), int(boxes[i][2] * frame.shape[0]))
+                print(
+                    f"{str(classes[i].numpy().decode())}: {int(100 * scores[i])}")
+                frame = cv.rectangle(
+                    frame, (right, top), (left,  bottom), (255, 0, 0), 2)
+                cv.putText(
+                    frame, f"{str(classes[i].numpy().decode())}: {int(100 * scores[i])}", (left, top - 10), cv.FONT_HERSHEY_SIMPLEX, 0.9, (36, 255, 12), 2)
+                cv.imwrite(f'{frame_count}.jpg', frame)
                 lst_of_objects.append(
                     [classes[i].numpy().decode(), frame_count, int(100 * scores[i])])
     if window_count == 1:
@@ -200,4 +209,4 @@ def cv_detection(video: str):
 
 
 if __name__ == '__main__':
-    output = cv_detection("../data/1.mp4")
+    output = cv_detection("../data/7.MP4")
